@@ -9,20 +9,15 @@ import (
 	"time"
 )
 
-var Set = wire.NewSet(LoadConfig, NewDynDnsClient)
+var clientSet = wire.NewSet(loadConfig, newDynDnsClient, wire.FieldsOf(new(*clientConfig), "IpProvider"))
 
 type DynDnsClient struct {
-	config   *ClientConfig
+	config   *clientConfig
 	provider addrproviders.AddressProvider
 	updater  updater.Updater
 }
 
-func NewDynDnsClient(config *ClientConfig, updater updater.Updater) (*DynDnsClient, error) {
-	provider, err := addrproviders.CreateProvider(config.IpProvider)
-	if err != nil {
-		return nil, err
-	}
-
+func newDynDnsClient(config *clientConfig, provider addrproviders.AddressProvider, updater updater.Updater) (*DynDnsClient, error) {
 	return &DynDnsClient{
 		config:   config,
 		updater:  updater,

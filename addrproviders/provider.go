@@ -3,19 +3,25 @@ package addrproviders
 import (
 	"fmt"
 	"net"
-	"strings"
+)
+
+type ProviderType string
+
+var (
+	Web      ProviderType = "web"
+	FritzBox ProviderType = "fritzbox"
 )
 
 type AddressProvider interface {
 	GetIP() (net.IP, error)
 }
 
-func CreateProvider(provider string) (AddressProvider, error) {
-	switch strings.ToLower(provider) {
-	case "web":
+func CreateProvider(provider ProviderType) (AddressProvider, error) {
+	switch provider {
+	case Web:
 		return createWebProvider()
 
-	case "fritzbox":
+	case FritzBox:
 		return createFritzBoxProvider()
 	}
 
