@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
+	"go-dyndns/util"
 	"io"
 	"net"
 	"net/http"
@@ -20,11 +21,12 @@ type fritzBoxConfig struct {
 }
 
 type fritzBoxProvider struct {
-	config *fritzBoxConfig
+	config     *fritzBoxConfig
+	httpClient util.HttpClient
 }
 
-func newFritzBoxProvider(config *fritzBoxConfig) *fritzBoxProvider {
-	return &fritzBoxProvider{config: config}
+func newFritzBoxProvider(config *fritzBoxConfig, httpClient util.HttpClient) *fritzBoxProvider {
+	return &fritzBoxProvider{config: config, httpClient: httpClient}
 }
 
 func loadFritzBoxConfig() (*fritzBoxConfig, error) {
@@ -37,7 +39,7 @@ func loadFritzBoxConfig() (*fritzBoxConfig, error) {
 }
 
 func (f *fritzBoxProvider) GetIP() (net.IP, error) {
-	resp, err := makeExternalIpSoapRequest(f.config.Host)
+	resp, err := f.makeExternalIpSoapRequest(f.config.Host)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +58,7 @@ func (f *fritzBoxProvider) GetIP() (net.IP, error) {
 	}
 }
 
-func makeExternalIpSoapRequest(host string) (*http.Response, error) {
+func (f *fritzBoxProvider) makeExternalIpSoapRequest(host string) (*http.Response, error) {
 	url := fmt.Sprintf("http://%s:49000/igdupnp/control/WANIPConn1", host)
 	body := `<?xml version="1.0" encoding="utf-8"?>
 <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -75,7 +77,7 @@ func makeExternalIpSoapRequest(host string) (*http.Response, error) {
 	request.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	request.Header.Add("SOAPAction", "urn:schemas-upnp-org:service:WANIPConnection:1#GetExternalIPAddress")
 
-	return http.DefaultClient.Do(request)
+	return f.httpClient.Do(request)
 }
 
 func parseExternalIpSoapResponse(body io.Reader) (string, error) {

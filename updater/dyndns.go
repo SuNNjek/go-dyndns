@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
+	"go-dyndns/util"
 	"io"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -31,11 +31,12 @@ func loadDynDnsConfig() (*dynDnsUpdaterConfig, error) {
 }
 
 type dynDnsUpdater struct {
-	config *dynDnsUpdaterConfig
+	config     *dynDnsUpdaterConfig
+	httpClient util.HttpClient
 }
 
-func newDynDnsUpdater(config *dynDnsUpdaterConfig) *dynDnsUpdater {
-	return &dynDnsUpdater{config: config}
+func newDynDnsUpdater(config *dynDnsUpdaterConfig, httpClient util.HttpClient) *dynDnsUpdater {
+	return &dynDnsUpdater{config: config, httpClient: httpClient}
 }
 
 func (u *dynDnsUpdater) UpdateIP(addr net.IP) error {
@@ -44,7 +45,7 @@ func (u *dynDnsUpdater) UpdateIP(addr net.IP) error {
 		return err
 	}
 
-	resp, err := http.Get(updateUrl.String())
+	resp, err := u.httpClient.Get(updateUrl.String())
 	if err != nil {
 		return err
 	}

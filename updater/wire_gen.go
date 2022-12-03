@@ -6,6 +6,10 @@
 
 package updater
 
+import (
+	"net/http"
+)
+
 // Injectors from wire.go:
 
 func CreateUpdater() (Updater, error) {
@@ -13,6 +17,11 @@ func CreateUpdater() (Updater, error) {
 	if err != nil {
 		return nil, err
 	}
-	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig)
+	httpClient := _wireClientValue
+	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig, httpClient)
 	return updaterDynDnsUpdater, nil
 }
+
+var (
+	_wireClientValue = http.DefaultClient
+)

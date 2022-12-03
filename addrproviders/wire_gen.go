@@ -6,6 +6,10 @@
 
 package addrproviders
 
+import (
+	"net/http"
+)
+
 // Injectors from wire.go:
 
 func createWebProvider() (*webProvider, error) {
@@ -13,15 +17,21 @@ func createWebProvider() (*webProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	addrprovidersWebProvider := newWebProvider(webProviderConfig)
+	httpClient := _wireClientValue
+	addrprovidersWebProvider := newWebProvider(webProviderConfig, httpClient)
 	return addrprovidersWebProvider, nil
 }
+
+var (
+	_wireClientValue = http.DefaultClient
+)
 
 func createFritzBoxProvider() (*fritzBoxProvider, error) {
 	addrprovidersFritzBoxConfig, err := loadFritzBoxConfig()
 	if err != nil {
 		return nil, err
 	}
-	addrprovidersFritzBoxProvider := newFritzBoxProvider(addrprovidersFritzBoxConfig)
+	httpClient := _wireClientValue
+	addrprovidersFritzBoxProvider := newFritzBoxProvider(addrprovidersFritzBoxConfig, httpClient)
 	return addrprovidersFritzBoxProvider, nil
 }

@@ -5,14 +5,17 @@
 
 package addrproviders
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+	"go-dyndns/util"
+)
 
 func createWebProvider() (*webProvider, error) {
-	wire.Build(webSet)
+	wire.Build(webSet, util.DefaultHttpClientValue)
 	return &webProvider{}, nil
 }
 
 func createFritzBoxProvider() (*fritzBoxProvider, error) {
-	wire.Build(fritzBoxSet)
+	wire.Build(fritzBoxSet, util.DefaultHttpClientValue)
 	return &fritzBoxProvider{}, nil
 }

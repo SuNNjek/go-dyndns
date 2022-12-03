@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
+	"go-dyndns/util"
 	"net"
-	"net/http"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
@@ -19,11 +19,12 @@ type WebProviderConfig struct {
 }
 
 type webProvider struct {
-	config *WebProviderConfig
+	config     *WebProviderConfig
+	httpClient util.HttpClient
 }
 
-func newWebProvider(config *WebProviderConfig) *webProvider {
-	return &webProvider{config: config}
+func newWebProvider(config *WebProviderConfig, httpClient util.HttpClient) *webProvider {
+	return &webProvider{config: config, httpClient: httpClient}
 }
 
 func loadWebProviderConfig() (*WebProviderConfig, error) {
@@ -36,7 +37,7 @@ func loadWebProviderConfig() (*WebProviderConfig, error) {
 }
 
 func (w *webProvider) GetIP() (net.IP, error) {
-	body, err := getBodyText(w.config.Url)
+	body, err := w.getBodyText(w.config.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +55,8 @@ func (w *webProvider) GetIP() (net.IP, error) {
 	}
 }
 
-func getBodyText(url string) (string, error) {
-	resp, err := http.Get(url)
+func (w *webProvider) getBodyText(url string) (string, error) {
+	resp, err := w.httpClient.Get(url)
 	if err != nil {
 		return "", err
 	}
