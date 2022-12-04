@@ -10,12 +10,12 @@ import (
 	"go-dyndns/util"
 )
 
-func createWebProvider() (*webProvider, error) {
-	wire.Build(webSet, util.DefaultHttpClientValue)
+func createWebProvider(httpClient util.HttpClient) (*webProvider, error) {
+	wire.Build(webSet)
 	return &webProvider{}, nil
 }
 
-func createFritzBoxProvider() (*fritzBoxProvider, error) {
-	wire.Build(fritzBoxSet, util.DefaultHttpClientValue)
+func createFritzBoxProvider(httpClient util.HttpClient) (*fritzBoxProvider, error) {
+	wire.Build(fritzBoxSet)
 	return &fritzBoxProvider{}, nil
 }

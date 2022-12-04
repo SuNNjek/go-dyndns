@@ -2,9 +2,9 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/wire"
 	"go-dyndns/addrproviders"
+	"go-dyndns/log"
 	"go-dyndns/updater"
 	"time"
 )
@@ -13,13 +13,15 @@ var clientSet = wire.NewSet(loadConfig, newDynDnsClient, wire.FieldsOf(new(*clie
 
 type DynDnsClient struct {
 	config   *clientConfig
+	logger   log.Logger
 	provider addrproviders.AddressProvider
 	updater  updater.Updater
 }
 
-func newDynDnsClient(config *clientConfig, provider addrproviders.AddressProvider, updater updater.Updater) (*DynDnsClient, error) {
+func newDynDnsClient(config *clientConfig, logger log.Logger, provider addrproviders.AddressProvider, updater updater.Updater) (*DynDnsClient, error) {
 	return &DynDnsClient{
 		config:   config,
+		logger:   logger,
 		updater:  updater,
 		provider: provider,
 	}, nil
@@ -31,7 +33,7 @@ func (c *DynDnsClient) Run(ctx context.Context) error {
 
 	for {
 		if err := c.doUpdate(); err != nil {
-			fmt.Println(err)
+			c.logger.Warn("Error while updating IP address: %v", err)
 		}
 
 		select {

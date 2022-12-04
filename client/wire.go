@@ -8,10 +8,18 @@ package client
 import (
 	"github.com/google/wire"
 	"go-dyndns/addrproviders"
+	"go-dyndns/log"
 	"go-dyndns/updater"
+	"go-dyndns/util"
 )
 
-func CreateClient() (*DynDnsClient, error) {
-	wire.Build(clientSet, addrproviders.CreateProvider, updater.CreateUpdater)
+func CreateClient(logger log.Logger) (*DynDnsClient, error) {
+	wire.Build(
+		clientSet,
+		util.DefaultHttpClientValue,
+		addrproviders.CreateProvider,
+		updater.CreateUpdater,
+	)
+
 	return &DynDnsClient{}, nil
 }

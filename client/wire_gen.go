@@ -8,28 +8,35 @@ package client
 
 import (
 	"go-dyndns/addrproviders"
+	"go-dyndns/log"
 	"go-dyndns/updater"
+	"net/http"
 )
 
 // Injectors from wire.go:
 
-func CreateClient() (*DynDnsClient, error) {
+func CreateClient(logger log.Logger) (*DynDnsClient, error) {
 	clientClientConfig, err := loadConfig()
 	if err != nil {
 		return nil, err
 	}
 	providerType := clientClientConfig.IpProvider
-	addressProvider, err := addrproviders.CreateProvider(providerType)
+	httpClient := _wireClientValue
+	addressProvider, err := addrproviders.CreateProvider(providerType, httpClient)
 	if err != nil {
 		return nil, err
 	}
-	updaterUpdater, err := updater.CreateUpdater()
+	updaterUpdater, err := updater.CreateUpdater(httpClient)
 	if err != nil {
 		return nil, err
 	}
-	dynDnsClient, err := newDynDnsClient(clientClientConfig, addressProvider, updaterUpdater)
+	dynDnsClient, err := newDynDnsClient(clientClientConfig, logger, addressProvider, updaterUpdater)
 	if err != nil {
 		return nil, err
 	}
 	return dynDnsClient, nil
 }
+
+var (
+	_wireClientValue = http.DefaultClient
+)

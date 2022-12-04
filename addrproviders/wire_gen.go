@@ -7,31 +7,25 @@
 package addrproviders
 
 import (
-	"net/http"
+	"go-dyndns/util"
 )
 
 // Injectors from wire.go:
 
-func createWebProvider() (*webProvider, error) {
+func createWebProvider(httpClient util.HttpClient) (*webProvider, error) {
 	webProviderConfig, err := loadWebProviderConfig()
 	if err != nil {
 		return nil, err
 	}
-	httpClient := _wireClientValue
 	addrprovidersWebProvider := newWebProvider(webProviderConfig, httpClient)
 	return addrprovidersWebProvider, nil
 }
 
-var (
-	_wireClientValue = http.DefaultClient
-)
-
-func createFritzBoxProvider() (*fritzBoxProvider, error) {
+func createFritzBoxProvider(httpClient util.HttpClient) (*fritzBoxProvider, error) {
 	addrprovidersFritzBoxConfig, err := loadFritzBoxConfig()
 	if err != nil {
 		return nil, err
 	}
-	httpClient := _wireClientValue
 	addrprovidersFritzBoxProvider := newFritzBoxProvider(addrprovidersFritzBoxConfig, httpClient)
 	return addrprovidersFritzBoxProvider, nil
 }

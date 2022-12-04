@@ -7,21 +7,16 @@
 package updater
 
 import (
-	"net/http"
+	"go-dyndns/util"
 )
 
 // Injectors from wire.go:
 
-func CreateUpdater() (Updater, error) {
+func CreateUpdater(httpClient util.HttpClient) (Updater, error) {
 	updaterDynDnsUpdaterConfig, err := loadDynDnsConfig()
 	if err != nil {
 		return nil, err
 	}
-	httpClient := _wireClientValue
 	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig, httpClient)
 	return updaterDynDnsUpdater, nil
 }
-
-var (
-	_wireClientValue = http.DefaultClient
-)
