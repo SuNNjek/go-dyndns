@@ -1,7 +1,6 @@
 package addrproviders
 
 import (
-	"errors"
 	"fmt"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
@@ -52,7 +51,7 @@ func (f *fritzBoxProvider) GetIP() (net.IP, error) {
 	}
 
 	if ip := net.ParseIP(ipStr); ip == nil {
-		return nil, errors.New("failed to parse IP")
+		return nil, ParseIpError
 	} else {
 		return ip, nil
 	}
@@ -86,9 +85,9 @@ func parseExternalIpSoapResponse(body io.Reader) (string, error) {
 		return "", err
 	}
 
-	node, err := xmlquery.Query(root, "//NewExternalIPAddress/text()")
-	if err != nil {
-		return "", err
+	node := xmlquery.FindOne(root, "//NewExternalIPAddress/text()")
+	if node == nil {
+		return "", InvalidResponseError
 	}
 
 	return node.Data, nil

@@ -1,7 +1,6 @@
 package addrproviders
 
 import (
-	"errors"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
 	"go-dyndns/util"
@@ -44,12 +43,12 @@ func (w *webProvider) GetIP() (net.IP, error) {
 
 	startIdx := strings.Index(body, ":")
 	if startIdx < 0 {
-		return nil, errors.New("no IP returned in response")
+		return nil, InvalidResponseError
 	}
 
 	ipStr := strings.TrimSpace(body[startIdx+1:])
 	if ip := net.ParseIP(ipStr); ip == nil {
-		return nil, errors.New("failed to parse IP")
+		return nil, ParseIpError
 	} else {
 		return ip, nil
 	}
@@ -68,9 +67,9 @@ func (w *webProvider) getBodyText(url string) (string, error) {
 		return "", err
 	}
 
-	body, err := htmlquery.Query(node, "//body/text()")
-	if err != nil {
-		return "", err
+	body := htmlquery.FindOne(node, "//body/text()")
+	if body == nil {
+		return "", InvalidResponseError
 	}
 
 	return body.Data, nil

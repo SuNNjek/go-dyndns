@@ -1,7 +1,6 @@
 package addrproviders
 
 import (
-	"fmt"
 	"net"
 )
 
@@ -25,5 +24,5 @@ func CreateProvider(provider ProviderType) (AddressProvider, error) {
 		return createFritzBoxProvider()
 	}
 
-	return nil, fmt.Errorf("unknown provider type: %s", provider)
+	return nil, UnknownProvider(string(provider))
 }
