@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"path"
 )
 
 type fileCache struct {
@@ -38,7 +39,13 @@ func (f *fileCache) GetLastIp() (net.IP, error) {
 }
 
 func (f *fileCache) SetLastIp(ip net.IP) error {
-	file, err := os.OpenFile(f.path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	// Create directory if not exists
+	dir := path.Dir(f.path)
+	if err := os.MkdirAll(dir, 1777); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(f.path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666) // The permissions of the beast
 	if err != nil {
 		return err
 	}

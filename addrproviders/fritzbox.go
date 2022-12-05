@@ -1,6 +1,7 @@
 package addrproviders
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
@@ -37,8 +38,8 @@ func loadFritzBoxConfig() (*fritzBoxConfig, error) {
 	return &config, nil
 }
 
-func (f *fritzBoxProvider) GetIP() (net.IP, error) {
-	resp, err := f.makeExternalIpSoapRequest(f.config.Host)
+func (f *fritzBoxProvider) GetIP(ctx context.Context) (net.IP, error) {
+	resp, err := f.makeExternalIpSoapRequest(ctx, f.config.Host)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func (f *fritzBoxProvider) GetIP() (net.IP, error) {
 	}
 }
 
-func (f *fritzBoxProvider) makeExternalIpSoapRequest(host string) (*http.Response, error) {
+func (f *fritzBoxProvider) makeExternalIpSoapRequest(ctx context.Context, host string) (*http.Response, error) {
 	url := fmt.Sprintf("http://%s:49000/igdupnp/control/WANIPConn1", host)
 	body := `<?xml version="1.0" encoding="utf-8"?>
 <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -66,7 +67,7 @@ func (f *fritzBoxProvider) makeExternalIpSoapRequest(host string) (*http.Respons
 	</s:Body>
 </s:Envelope>`
 
-	request, err := http.NewRequest("POST", url, strings.NewReader(body))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, url, strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

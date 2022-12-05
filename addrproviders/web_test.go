@@ -2,8 +2,10 @@ package addrproviders
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"go-dyndns/util"
 	"io"
 	"net/http"
@@ -18,7 +20,7 @@ func Test_webProvider_GetIP_Success(t *testing.T) {
 	httpClient := setupWebHttpClientMockWithIp("http://checkip.dyndns.com/", "127.0.0.1")
 
 	provider := newWebProvider(config, httpClient)
-	ip, err := provider.GetIP()
+	ip, err := provider.GetIP(context.Background())
 
 	assert.Nil(t, err)
 	assert.Equal(t, "127.0.0.1", ip.String())
@@ -34,7 +36,7 @@ func Test_webProvider_GetIP_MalformedIP(t *testing.T) {
 	httpClient := setupWebHttpClientMockWithIp("http://checkip.dyndns.com/", "asdf")
 
 	provider := newWebProvider(config, httpClient)
-	_, err := provider.GetIP()
+	_, err := provider.GetIP(context.Background())
 
 	assert.ErrorIs(t, err, ParseIpError)
 	httpClient.AssertExpectations(t)
@@ -48,7 +50,7 @@ func Test_webProvider_GetIP_InvalidResponseHtml(t *testing.T) {
 	httpClient := setupWebHttpClientMock("http://checkip.dyndns.com/", "asdf")
 
 	provider := newWebProvider(config, httpClient)
-	_, err := provider.GetIP()
+	_, err := provider.GetIP(context.Background())
 
 	assert.ErrorIs(t, err, InvalidResponseError)
 	httpClient.AssertExpectations(t)
@@ -63,7 +65,7 @@ func setupWebHttpClientMockWithIp(url, ip string) *util.MockHttpClient {
 
 func setupWebHttpClientMock(url, responseText string) *util.MockHttpClient {
 	httpClient := new(util.MockHttpClient)
-	httpClient.On("Get", url).
+	httpClient.On("Do", mock.MatchedBy(func(req *http.Request) bool { return req.URL.String() == url })).
 		Return(&http.Response{
 			Status:        "200 OK",
 			StatusCode:    200,

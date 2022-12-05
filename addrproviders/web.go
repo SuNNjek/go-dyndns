@@ -1,10 +1,12 @@
 package addrproviders
 
 import (
+	"context"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
 	"go-dyndns/util"
 	"net"
+	"net/http"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
@@ -35,8 +37,8 @@ func loadWebProviderConfig() (*WebProviderConfig, error) {
 	return &config, nil
 }
 
-func (w *webProvider) GetIP() (net.IP, error) {
-	body, err := w.getBodyText(w.config.Url)
+func (w *webProvider) GetIP(ctx context.Context) (net.IP, error) {
+	body, err := w.getBodyText(ctx, w.config.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +56,13 @@ func (w *webProvider) GetIP() (net.IP, error) {
 	}
 }
 
-func (w *webProvider) getBodyText(url string) (string, error) {
-	resp, err := w.httpClient.Get(url)
+func (w *webProvider) getBodyText(ctx context.Context, url string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := w.httpClient.Do(req)
 	if err != nil {
 		return "", err
 	}

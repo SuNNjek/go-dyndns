@@ -2,6 +2,7 @@ package addrproviders
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -19,7 +20,7 @@ func Test_fritzBoxProvider_GetIP_Success(t *testing.T) {
 	httpClient := setupFritzboxHttpClientMockWithIP("127.0.0.1")
 
 	provider := newFritzBoxProvider(config, httpClient)
-	ip, err := provider.GetIP()
+	ip, err := provider.GetIP(context.Background())
 
 	assert.Nil(t, err)
 	assert.Equal(t, "127.0.0.1", ip.String())
@@ -35,7 +36,7 @@ func Test_fritzBoxProvider_GetIP_MalformedIP(t *testing.T) {
 	httpClient := setupFritzboxHttpClientMockWithIP("asdf")
 
 	provider := newFritzBoxProvider(config, httpClient)
-	_, err := provider.GetIP()
+	_, err := provider.GetIP(context.Background())
 
 	assert.ErrorIs(t, err, ParseIpError)
 	httpClient.AssertExpectations(t)
@@ -49,7 +50,7 @@ func Test_fritzBoxProvider_GetIP_InvalidResponseXml(t *testing.T) {
 	httpClient := setupFritzboxHttpClientMock("asdf")
 
 	provider := newFritzBoxProvider(config, httpClient)
-	_, err := provider.GetIP()
+	_, err := provider.GetIP(context.Background())
 
 	assert.ErrorIs(t, err, InvalidResponseError)
 	httpClient.AssertExpectations(t)

@@ -46,10 +46,8 @@ func (c *DynDnsClient) Run(ctx context.Context) error {
 	defer ticker.Stop()
 
 	for {
-		if err := c.doUpdate(); err != nil {
+		if err := c.doUpdate(ctx); err != nil {
 			c.logger.Warn("Error while updating IP address: %v", err)
-		} else {
-			c.logger.Info("IP successfully updated")
 		}
 
 		select {
@@ -64,13 +62,13 @@ func (c *DynDnsClient) Run(ctx context.Context) error {
 	}
 }
 
-func (c *DynDnsClient) doUpdate() error {
+func (c *DynDnsClient) doUpdate(ctx context.Context) error {
 	lastIp, err := c.cache.GetLastIp()
 	if err != nil {
 		c.logger.Warn("Failed to get last IP from cache: %v", err)
 	}
 
-	ip, err := c.provider.GetIP()
+	ip, err := c.provider.GetIP(ctx)
 	if err != nil {
 		return err
 	}
@@ -82,8 +80,10 @@ func (c *DynDnsClient) doUpdate() error {
 		return nil
 	}
 
-	if err = c.updater.UpdateIP(ip); err != nil {
+	if err = c.updater.UpdateIP(ctx, ip); err != nil {
 		return err
+	} else {
+		c.logger.Info("IP successfully updated")
 	}
 
 	return c.cache.SetLastIp(ip)

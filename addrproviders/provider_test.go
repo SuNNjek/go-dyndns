@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateWebProvider(t *testing.T) {
-	t.Setenv("WEB_URL", "example.com")
+	t.Setenv("IPCHECK_URL", "example.com")
 
 	providerWeb, err := CreateProvider(Web, httpClientMock)
 

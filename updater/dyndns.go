@@ -1,6 +1,7 @@
 package updater
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/google/wire"
@@ -9,6 +10,7 @@ import (
 	"go-dyndns/util"
 	"io"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -60,15 +62,15 @@ func newDynDnsUpdater(config *dynDnsUpdaterConfig, logger log.Logger, httpClient
 	return &dynDnsUpdater{config: config, logger: logger, httpClient: httpClient}
 }
 
-func (u *dynDnsUpdater) UpdateIP(addr net.IP) error {
+func (u *dynDnsUpdater) UpdateIP(ctx context.Context, addr net.IP) error {
 	u.logger.Info("Updating IP for domains %v to %v", strings.Join(u.config.Domains, ", "), addr)
 
-	updateUrl, err := u.createUpdateUrl(addr)
+	req, err := u.createUpdateRequest(ctx, addr)
 	if err != nil {
 		return err
 	}
 
-	resp, err := u.httpClient.Get(updateUrl.String())
+	resp, err := u.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -83,9 +85,19 @@ func (u *dynDnsUpdater) UpdateIP(addr net.IP) error {
 	return handleResponse(strings.TrimSpace(string(body)))
 }
 
-func (u *dynDnsUpdater) createUpdateUrl(addr net.IP) (*url.URL, error) {
+func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*http.Request, error) {
 	strUrl := fmt.Sprintf("https://%s/v3/update", u.config.Host)
 	updateUrl, err := url.Parse(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	query := make(url.Values)
+	query.Add("hostname", strings.Join(u.config.Domains, ","))
+	query.Add("myip", fmt.Sprint(addr))
+	updateUrl.RawQuery = query.Encode()
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, updateUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -95,14 +107,9 @@ func (u *dynDnsUpdater) createUpdateUrl(addr net.IP) (*url.URL, error) {
 		return nil, err
 	}
 
-	updateUrl.User = url.UserPassword(u.config.User, password)
+	request.SetBasicAuth(u.config.User, password)
 
-	query := updateUrl.Query()
-	query.Add("hostname", strings.Join(u.config.Domains, ","))
-	query.Add("myip", fmt.Sprint(addr))
-	updateUrl.RawQuery = query.Encode()
-
-	return updateUrl, nil
+	return request, nil
 }
 
 func handleResponse(response string) error {

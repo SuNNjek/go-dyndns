@@ -1,6 +1,7 @@
 package addrproviders
 
 import (
+	"context"
 	"go-dyndns/util"
 	"net"
 )
@@ -13,7 +14,7 @@ const (
 )
 
 type AddressProvider interface {
-	GetIP() (net.IP, error)
+	GetIP(ctx context.Context) (net.IP, error)
 }
 
 func CreateProvider(provider ProviderType, httpClient util.HttpClient) (AddressProvider, error) {

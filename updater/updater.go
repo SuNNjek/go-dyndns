@@ -1,9 +1,10 @@
 package updater
 
 import (
+	"context"
 	"net"
 )
 
 type Updater interface {
-	UpdateIP(addr net.IP) error
+	UpdateIP(ctx context.Context, addr net.IP) error
 }
