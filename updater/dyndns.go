@@ -82,7 +82,7 @@ func (u *dynDnsUpdater) UpdateIP(ctx context.Context, addr net.IP) error {
 		return err
 	}
 
-	return handleResponse(strings.TrimSpace(string(body)))
+	return u.handleResponse(strings.TrimSpace(string(body)))
 }
 
 func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*http.Request, error) {
@@ -117,7 +117,9 @@ func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*
 	return request, nil
 }
 
-func handleResponse(response string) error {
+func (u *dynDnsUpdater) handleResponse(response string) error {
+	u.logger.Trace("Received response: %s", response)
+
 	if strings.HasPrefix(response, "good") {
 		return nil
 	}
