@@ -109,6 +109,11 @@ func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*
 
 	request.SetBasicAuth(u.config.User, password)
 
+	u.logger.Trace(
+		"Created update request for URL %v with user %s and password %s",
+		updateUrl.String(), u.config.User, password,
+	)
+
 	return request, nil
 }
 
