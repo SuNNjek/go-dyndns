@@ -1,5 +1,7 @@
 # go-dyndns
 
+[![codecov](https://codecov.io/gh/SuNNjek/go-dyndns/branch/main/graph/badge.svg?token=DWJII5ZVJ5)](https://codecov.io/gh/SuNNjek/go-dyndns)
+
 go-dyndns is a DynDns client written in Golang (yes, very creative name, I know :smile: )
 
 ## Installation/Configuration
