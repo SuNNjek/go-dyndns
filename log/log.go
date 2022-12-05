@@ -32,7 +32,7 @@ func createDefaultWriterLogger(config *loggerConfig) *writerLogger {
 	return &writerLogger{
 		normalOut: os.Stdout,
 		errorOut:  os.Stderr,
-		level:     config.level,
+		level:     config.Level,
 	}
 }
 

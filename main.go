@@ -6,6 +6,8 @@ import (
 	"go-dyndns/client"
 	"go-dyndns/log"
 	golog "log"
+
+	_ "time/tzdata"
 )
 
 func main() {
