@@ -3,7 +3,7 @@ package log
 import "github.com/kelseyhightower/envconfig"
 
 type loggerConfig struct {
-	level LogLevel `default:"info"`
+	Level LogLevel `default:"info"`
 }
 
 func loadConfig() (*loggerConfig, error) {

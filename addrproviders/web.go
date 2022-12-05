@@ -28,7 +28,7 @@ func newWebProvider(config *WebProviderConfig, httpClient util.HttpClient) *webP
 
 func loadWebProviderConfig() (*WebProviderConfig, error) {
 	var config WebProviderConfig
-	if err := envconfig.Process("web", &config); err != nil {
+	if err := envconfig.Process("ipcheck", &config); err != nil {
 		return nil, err
 	}
 
