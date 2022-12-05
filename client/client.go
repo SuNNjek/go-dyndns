@@ -76,7 +76,7 @@ func (c *DynDnsClient) doUpdate(ctx context.Context) error {
 	// Don't send an update request if the IP matches that from cache.
 	// DynDNS providers don't like it when you send too many requests for the same IP ;)
 	if ip.Equal(lastIp) {
-		c.logger.Info("IP is already up to date")
+		c.logger.Debug("IP is already up to date")
 		return nil
 	}
 
