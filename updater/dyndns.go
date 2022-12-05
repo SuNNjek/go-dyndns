@@ -1,9 +1,11 @@
 package updater
 
 import (
+	"errors"
 	"fmt"
 	"github.com/google/wire"
 	"github.com/kelseyhightower/envconfig"
+	"go-dyndns/log"
 	"go-dyndns/util"
 	"io"
 	"net"
@@ -13,6 +15,24 @@ import (
 )
 
 var dynDnsSet = wire.NewSet(loadDynDnsConfig, newDynDnsUpdater)
+
+var (
+	AuthenticationError = errors.New("the given username or password are incorrect")
+	HostNotFQDN         = errors.New("the given host is not a fully qualified domain name")
+	HostNotFound        = errors.New("the given host is not associated with the given user")
+	TooManyHosts        = errors.New("too many hosts given")
+	AbuseError          = errors.New("IP was updated too often and has been blocked for update abuse")
+	DnsError            = errors.New("DNS error")
+	ServerError         = errors.New("server error")
+)
+
+type InvalidResponse struct {
+	response string
+}
+
+func (i *InvalidResponse) Error() string {
+	return fmt.Sprintf("invalid response: %s", i.response)
+}
 
 type dynDnsUpdaterConfig struct {
 	Host         string   `required:"true"`
@@ -32,14 +52,17 @@ func loadDynDnsConfig() (*dynDnsUpdaterConfig, error) {
 
 type dynDnsUpdater struct {
 	config     *dynDnsUpdaterConfig
+	logger     log.Logger
 	httpClient util.HttpClient
 }
 
-func newDynDnsUpdater(config *dynDnsUpdaterConfig, httpClient util.HttpClient) *dynDnsUpdater {
-	return &dynDnsUpdater{config: config, httpClient: httpClient}
+func newDynDnsUpdater(config *dynDnsUpdaterConfig, logger log.Logger, httpClient util.HttpClient) *dynDnsUpdater {
+	return &dynDnsUpdater{config: config, logger: logger, httpClient: httpClient}
 }
 
 func (u *dynDnsUpdater) UpdateIP(addr net.IP) error {
+	u.logger.Info("Updating IP for domains %v to %v", strings.Join(u.config.Domains, ", "), addr)
+
 	updateUrl, err := u.createUpdateUrl(addr)
 	if err != nil {
 		return err
@@ -53,9 +76,11 @@ func (u *dynDnsUpdater) UpdateIP(addr net.IP) error {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return handleResponse(strings.TrimSpace(string(body)))
 }
 
 func (u *dynDnsUpdater) createUpdateUrl(addr net.IP) (*url.URL, error) {
@@ -78,6 +103,46 @@ func (u *dynDnsUpdater) createUpdateUrl(addr net.IP) (*url.URL, error) {
 	updateUrl.RawQuery = query.Encode()
 
 	return updateUrl, nil
+}
+
+func handleResponse(response string) error {
+	if strings.HasPrefix(response, "good") {
+		return nil
+	}
+
+	if strings.HasPrefix(response, "nochg") {
+		return nil
+	}
+
+	if strings.HasPrefix(response, "badauth") {
+		return AuthenticationError
+	}
+
+	if strings.HasPrefix(response, "notfqdn") {
+		return HostNotFQDN
+	}
+
+	if strings.HasPrefix(response, "nohost") {
+		return HostNotFound
+	}
+
+	if strings.HasPrefix(response, "numhost") {
+		return TooManyHosts
+	}
+
+	if strings.HasPrefix(response, "abuse") || strings.HasPrefix(response, "toomanyrequests") {
+		return AbuseError
+	}
+
+	if strings.HasPrefix(response, "dnserr") {
+		return DnsError
+	}
+
+	if strings.HasPrefix(response, "911") {
+		return ServerError
+	}
+
+	return &InvalidResponse{response: response}
 }
 
 func (u *dynDnsUpdater) getPassword() (string, error) {

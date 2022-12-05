@@ -53,7 +53,7 @@ func (w *writerLogger) Log(level LogLevel, format string, args ...any) {
 	}
 
 	message := fmt.Sprintf(format, args...)
-	formattedTime := time.Now().Format(time.RFC3339)
+	formattedTime := time.Now().Format("2006-01-02 15:04:05.000")
 	_, _ = fmt.Fprintf(writer, "[%s][%v]: %s\n", formattedTime, level, message)
 }
 

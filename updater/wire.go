@@ -7,10 +7,11 @@ package updater
 
 import (
 	"github.com/google/wire"
+	"go-dyndns/log"
 	"go-dyndns/util"
 )
 
-func CreateUpdater(httpClient util.HttpClient) (Updater, error) {
+func CreateUpdater(logger log.Logger, httpClient util.HttpClient) (Updater, error) {
 	wire.Build(dynDnsSet, wire.Bind(new(Updater), new(*dynDnsUpdater)))
 	return &dynDnsUpdater{}, nil
 }

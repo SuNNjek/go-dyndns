@@ -7,16 +7,17 @@
 package updater
 
 import (
+	"go-dyndns/log"
 	"go-dyndns/util"
 )
 
 // Injectors from wire.go:
 
-func CreateUpdater(httpClient util.HttpClient) (Updater, error) {
+func CreateUpdater(logger log.Logger, httpClient util.HttpClient) (Updater, error) {
 	updaterDynDnsUpdaterConfig, err := loadDynDnsConfig()
 	if err != nil {
 		return nil, err
 	}
-	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig, httpClient)
+	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig, logger, httpClient)
 	return updaterDynDnsUpdater, nil
 }

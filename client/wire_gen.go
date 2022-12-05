@@ -8,6 +8,7 @@ package client
 
 import (
 	"go-dyndns/addrproviders"
+	"go-dyndns/cache"
 	"go-dyndns/log"
 	"go-dyndns/updater"
 	"net/http"
@@ -20,17 +21,21 @@ func CreateClient(logger log.Logger) (*DynDnsClient, error) {
 	if err != nil {
 		return nil, err
 	}
+	cacheCache, err := cache.CreateCache()
+	if err != nil {
+		return nil, err
+	}
 	providerType := clientClientConfig.IpProvider
 	httpClient := _wireClientValue
 	addressProvider, err := addrproviders.CreateProvider(providerType, httpClient)
 	if err != nil {
 		return nil, err
 	}
-	updaterUpdater, err := updater.CreateUpdater(httpClient)
+	updaterUpdater, err := updater.CreateUpdater(logger, httpClient)
 	if err != nil {
 		return nil, err
 	}
-	dynDnsClient, err := newDynDnsClient(clientClientConfig, logger, addressProvider, updaterUpdater)
+	dynDnsClient, err := newDynDnsClient(clientClientConfig, logger, cacheCache, addressProvider, updaterUpdater)
 	if err != nil {
 		return nil, err
 	}
