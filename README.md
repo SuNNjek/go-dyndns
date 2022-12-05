@@ -47,4 +47,3 @@ The following environment variables can be used:
   Use a docker secret for this one (see example above)
 * `LOG_LEVEL`: The level used for logging. Potentially useful for diagnosing problems
   (if I can be bothered to add more logs, that is :smile: )
-* 
