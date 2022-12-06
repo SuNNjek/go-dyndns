@@ -1,6 +1,8 @@
 # go-dyndns
 
-[![codecov](https://codecov.io/gh/SuNNjek/go-dyndns/branch/main/graph/badge.svg?token=DWJII5ZVJ5)](https://codecov.io/gh/SuNNjek/go-dyndns)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SuNNjek/go-dyndns/Test%20and%20coverage?style=for-the-badge&logo=github)](https://github.com/SuNNjek/go-dyndns/actions/workflows/ci.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/SuNNjek/go-dyndns?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/SuNNjek/go-dyndns)
+[![License](https://img.shields.io/github/license/SuNNjek/go-dyndns?style=for-the-badge)](https://github.com/SuNNjek/go-dyndns/blob/main/LICENSE.txt)
 
 go-dyndns is a DynDns client written in Golang (yes, very creative name, I know :smile: )
 
