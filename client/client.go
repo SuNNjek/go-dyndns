@@ -27,14 +27,14 @@ func newDynDnsClient(
 	cache cache.Cache,
 	provider addrproviders.AddressProvider,
 	updater updater.Updater,
-) (*DynDnsClient, error) {
+) *DynDnsClient {
 	return &DynDnsClient{
 		config:   config,
 		logger:   logger,
 		cache:    cache,
 		updater:  updater,
 		provider: provider,
-	}, nil
+	}
 }
 
 func (c *DynDnsClient) Run(ctx context.Context) error {

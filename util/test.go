@@ -28,3 +28,12 @@ func (m *MockHttpClient) Do(req *http.Request) (*http.Response, error) {
 		return nil, args.Error(1)
 	}
 }
+
+type MockPasswordProvider struct {
+	mock.Mock
+}
+
+func (m *MockPasswordProvider) GetPassword() (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}

@@ -12,11 +12,10 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
-var dynDnsSet = wire.NewSet(loadDynDnsConfig, newDynDnsUpdater)
+var dynDnsSet = wire.NewSet(loadDynDnsConfig, newDynDnsUpdater, wire.FieldsOf(new(*dynDnsUpdaterConfig), "PasswordFile"))
 
 var (
 	AuthenticationError = errors.New("the given username or password are incorrect")
@@ -37,10 +36,10 @@ func (i *InvalidResponse) Error() string {
 }
 
 type dynDnsUpdaterConfig struct {
-	Host         string   `required:"true"`
-	User         string   `required:"true"`
-	PasswordFile string   `required:"true"`
-	Domains      []string `required:"true"`
+	Host         string                `required:"true"`
+	User         string                `required:"true"`
+	PasswordFile util.PasswordFilePath `required:"true"`
+	Domains      []string              `required:"true"`
 }
 
 func loadDynDnsConfig() (*dynDnsUpdaterConfig, error) {
@@ -53,13 +52,24 @@ func loadDynDnsConfig() (*dynDnsUpdaterConfig, error) {
 }
 
 type dynDnsUpdater struct {
-	config     *dynDnsUpdaterConfig
-	logger     log.Logger
-	httpClient util.HttpClient
+	config           *dynDnsUpdaterConfig
+	passwordProvider util.PasswordProvider
+	logger           log.Logger
+	httpClient       util.HttpClient
 }
 
-func newDynDnsUpdater(config *dynDnsUpdaterConfig, logger log.Logger, httpClient util.HttpClient) *dynDnsUpdater {
-	return &dynDnsUpdater{config: config, logger: logger, httpClient: httpClient}
+func newDynDnsUpdater(
+	config *dynDnsUpdaterConfig,
+	passwordProvider util.PasswordProvider,
+	logger log.Logger,
+	httpClient util.HttpClient,
+) *dynDnsUpdater {
+	return &dynDnsUpdater{
+		config:           config,
+		passwordProvider: passwordProvider,
+		logger:           logger,
+		httpClient:       httpClient,
+	}
 }
 
 func (u *dynDnsUpdater) UpdateIP(ctx context.Context, addr net.IP) error {
@@ -102,7 +112,7 @@ func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*
 		return nil, err
 	}
 
-	password, err := u.getPassword()
+	password, err := u.passwordProvider.GetPassword()
 	if err != nil {
 		return nil, err
 	}
@@ -157,20 +167,4 @@ func (u *dynDnsUpdater) handleResponse(response string) error {
 	}
 
 	return &InvalidResponse{response: response}
-}
-
-func (u *dynDnsUpdater) getPassword() (string, error) {
-	file, err := os.Open(u.config.PasswordFile)
-	if err != nil {
-		return "", err
-	}
-
-	defer file.Close()
-
-	bytes, err := io.ReadAll(file)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bytes), nil
 }

@@ -18,6 +18,8 @@ func CreateUpdater(logger log.Logger, httpClient util.HttpClient) (Updater, erro
 	if err != nil {
 		return nil, err
 	}
-	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig, logger, httpClient)
+	passwordFilePath := updaterDynDnsUpdaterConfig.PasswordFile
+	passwordProvider := util.NewFilePasswordProvider(passwordFilePath)
+	updaterDynDnsUpdater := newDynDnsUpdater(updaterDynDnsUpdaterConfig, passwordProvider, logger, httpClient)
 	return updaterDynDnsUpdater, nil
 }

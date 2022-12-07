@@ -12,6 +12,6 @@ import (
 )
 
 func CreateUpdater(logger log.Logger, httpClient util.HttpClient) (Updater, error) {
-	wire.Build(dynDnsSet, wire.Bind(new(Updater), new(*dynDnsUpdater)))
+	wire.Build(dynDnsSet, util.NewFilePasswordProvider, wire.Bind(new(Updater), new(*dynDnsUpdater)))
 	return &dynDnsUpdater{}, nil
 }

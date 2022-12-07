@@ -35,10 +35,7 @@ func CreateClient(logger log.Logger) (*DynDnsClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	dynDnsClient, err := newDynDnsClient(clientClientConfig, logger, cacheCache, addressProvider, updaterUpdater)
-	if err != nil {
-		return nil, err
-	}
+	dynDnsClient := newDynDnsClient(clientClientConfig, logger, cacheCache, addressProvider, updaterUpdater)
 	return dynDnsClient, nil
 }
 

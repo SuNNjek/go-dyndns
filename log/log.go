@@ -28,6 +28,14 @@ type writerLogger struct {
 	level LogLevel
 }
 
+func CreateTestLogger() Logger {
+	return &writerLogger{
+		normalOut: os.Stdout,
+		errorOut:  os.Stderr,
+		level:     Debug,
+	}
+}
+
 func createDefaultWriterLogger(config *loggerConfig) *writerLogger {
 	return &writerLogger{
 		normalOut: os.Stdout,
