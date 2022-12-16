@@ -1,6 +1,6 @@
 # go-dyndns
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SuNNjek/go-dyndns/Test%20and%20coverage?style=for-the-badge&logo=github)](https://github.com/SuNNjek/go-dyndns/actions/workflows/ci.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SuNNjek/go-dyndns/ci.yml?branch=main&style=for-the-badge&logo=github)](https://github.com/SuNNjek/go-dyndns/actions/workflows/ci.yml)
 [![Codecov](https://img.shields.io/codecov/c/github/SuNNjek/go-dyndns?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/SuNNjek/go-dyndns)
 [![License](https://img.shields.io/github/license/SuNNjek/go-dyndns?style=for-the-badge)](https://github.com/SuNNjek/go-dyndns/blob/main/LICENSE.txt)
 
