@@ -6,16 +6,27 @@ import (
 	"go-dyndns/client"
 	"go-dyndns/log"
 	golog "log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
+// Listen to SIGINT (Ctrl+C) and SIGTERM (docker stop) signals
+var cancelSignals = []os.Signal{
+	syscall.SIGINT,
+	syscall.SIGTERM,
+}
+
 func main() {
-	ctx, disposeCtx := wrapInterruptContext(context.Background())
-	defer disposeCtx()
+	ctx, cancel := signal.NotifyContext(context.Background(), cancelSignals...)
+	defer cancel()
 
 	logger, err := log.CreateLogger()
 	if err != nil {
 		golog.Fatalln(err)
 	}
+
+	logger.Info("Started go-dyndns")
 
 	cl, err := client.CreateClient(logger)
 	if err != nil {

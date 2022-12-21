@@ -21,6 +21,7 @@ secrets:
 services:
   go-dyndns:
     image: ghcr.io/sunnjek/go-dyndns
+    restart: unless-stopped
     secrets:
       - password
     tmpfs: /tmp
