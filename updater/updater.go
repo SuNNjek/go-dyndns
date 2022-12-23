@@ -2,9 +2,8 @@ package updater
 
 import (
 	"context"
-	"net"
 )
 
 type Updater interface {
-	UpdateIP(ctx context.Context, addr net.IP) error
+	UpdateIP(ctx context.Context, req *UpdateRequest) error
 }

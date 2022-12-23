@@ -37,7 +37,7 @@ func loadWebProviderConfig() (*WebProviderConfig, error) {
 	return &config, nil
 }
 
-func (w *webProvider) GetIP(ctx context.Context) (net.IP, error) {
+func (w *webProvider) GetIPv4(ctx context.Context) (net.IP, error) {
 	body, err := w.getBodyText(ctx, w.config.Url)
 	if err != nil {
 		return nil, err

@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"io"
-	"net"
+	"encoding/json"
+	"go-dyndns/updater"
 	"os"
 	"path"
 )
@@ -15,7 +15,7 @@ func newFileCache(path string) *fileCache {
 	return &fileCache{path: path}
 }
 
-func (f *fileCache) GetLastIp() (net.IP, error) {
+func (f *fileCache) GetLastRequest() (*updater.UpdateRequest, error) {
 	file, err := os.OpenFile(f.path, os.O_RDONLY, 0755)
 	if os.IsNotExist(err) {
 		return nil, nil
@@ -25,20 +25,17 @@ func (f *fileCache) GetLastIp() (net.IP, error) {
 
 	defer file.Close()
 
-	content, err := io.ReadAll(file)
-	if err != nil {
+	decoder := json.NewDecoder(file)
+
+	var req updater.UpdateRequest
+	if err = decoder.Decode(&req); err != nil {
 		return nil, err
 	}
 
-	var ip net.IP
-	if err = ip.UnmarshalText(content); err != nil {
-		return nil, err
-	}
-
-	return ip, nil
+	return &req, nil
 }
 
-func (f *fileCache) SetLastIp(ip net.IP) error {
+func (f *fileCache) SetLastRequest(req *updater.UpdateRequest) error {
 	// Create directory if not exists
 	dir := path.Dir(f.path)
 	if err := os.MkdirAll(dir, 1777); err != nil {
@@ -52,11 +49,6 @@ func (f *fileCache) SetLastIp(ip net.IP) error {
 
 	defer file.Close()
 
-	newContent, err := ip.MarshalText()
-	if err != nil {
-		return err
-	}
-
-	_, err = file.Write(newContent)
-	return err
+	encoder := json.NewEncoder(file)
+	return encoder.Encode(req)
 }

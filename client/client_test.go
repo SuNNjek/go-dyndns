@@ -21,17 +21,18 @@ func TestDynDnsClient_doUpdate_ShouldUpdateWhenCacheIsEmpty(t *testing.T) {
 
 	client := createClient(10*time.Minute, cacheMock, providerMock, updaterMock)
 	ip := net.ParseIP("127.0.0.1")
+	req := &updater.UpdateRequest{IPv4: ip}
 
-	cacheMock.On("GetLastIp").
+	cacheMock.On("GetLastRequest").
 		Return(nil, nil)
 
-	providerMock.On("GetIP", mock.Anything).
+	providerMock.On("GetIPv4", mock.Anything).
 		Return(ip, nil)
 
-	updaterMock.On("UpdateIP", mock.Anything, ip).
+	updaterMock.On("UpdateIP", mock.Anything, req).
 		Return(nil)
 
-	cacheMock.On("SetLastIp", ip).
+	cacheMock.On("SetLastRequest", req).
 		Return(nil)
 
 	err := client.doUpdate(context.Background())
@@ -49,17 +50,18 @@ func TestDynDnsClient_doUpdate_ShouldUpdateWhenCacheReturnsError(t *testing.T) {
 
 	client := createClient(10*time.Minute, cacheMock, providerMock, updaterMock)
 	ip := net.ParseIP("127.0.0.1")
+	req := &updater.UpdateRequest{IPv4: ip}
 
-	cacheMock.On("GetLastIp").
+	cacheMock.On("GetLastRequest").
 		Return(nil, errors.New("failed to get IP address"))
 
-	providerMock.On("GetIP", mock.Anything).
+	providerMock.On("GetIPv4", mock.Anything).
 		Return(ip, nil)
 
-	updaterMock.On("UpdateIP", mock.Anything, ip).
+	updaterMock.On("UpdateIP", mock.Anything, req).
 		Return(nil)
 
-	cacheMock.On("SetLastIp", ip).
+	cacheMock.On("SetLastRequest", req).
 		Return(nil)
 
 	err := client.doUpdate(context.Background())
@@ -80,16 +82,18 @@ func TestDynDnsClient_doUpdate_ShouldUpdateWhenIpHasChanged(t *testing.T) {
 	lastIp := net.ParseIP("127.0.0.1")
 	newIp := net.ParseIP("127.0.0.2")
 
-	cacheMock.On("GetLastIp").
-		Return(lastIp, nil)
+	req := &updater.UpdateRequest{IPv4: newIp}
 
-	providerMock.On("GetIP", mock.Anything).
+	cacheMock.On("GetLastRequest").
+		Return(&updater.UpdateRequest{IPv4: lastIp}, nil)
+
+	providerMock.On("GetIPv4", mock.Anything).
 		Return(newIp, nil)
 
-	updaterMock.On("UpdateIP", mock.Anything, newIp).
+	updaterMock.On("UpdateIP", mock.Anything, req).
 		Return(nil)
 
-	cacheMock.On("SetLastIp", newIp).
+	cacheMock.On("SetLastRequest", req).
 		Return(nil)
 
 	err := client.doUpdate(context.Background())
@@ -108,11 +112,12 @@ func TestDynDnsClient_doUpdate_ShouldNotUpdateWhenIpHasntChanged(t *testing.T) {
 
 	client := createClient(10*time.Minute, cacheMock, providerMock, updaterMock)
 	ip := net.ParseIP("127.0.0.1")
+	req := &updater.UpdateRequest{IPv4: ip}
 
-	cacheMock.On("GetLastIp").
-		Return(ip, nil)
+	cacheMock.On("GetLastRequest").
+		Return(req, nil)
 
-	providerMock.On("GetIP", mock.Anything).
+	providerMock.On("GetIPv4", mock.Anything).
 		Return(ip, nil)
 
 	err := client.doUpdate(context.Background())
@@ -131,11 +136,12 @@ func TestDynDnsClient_doUpdate_ShouldFailIfIpCouldNotBeRetrieved(t *testing.T) {
 
 	client := createClient(10*time.Minute, cacheMock, providerMock, updaterMock)
 	ip := net.ParseIP("127.0.0.1")
+	req := &updater.UpdateRequest{IPv4: ip}
 
-	cacheMock.On("GetLastIp").
-		Return(ip, nil)
+	cacheMock.On("GetLastRequest").
+		Return(req, nil)
 
-	providerMock.On("GetIP", mock.Anything).
+	providerMock.On("GetIPv4", mock.Anything).
 		Return(nil, errors.New("no IP for you lmao"))
 
 	err := client.doUpdate(context.Background())
@@ -154,19 +160,20 @@ func TestDynDnsClient_Run(t *testing.T) {
 
 	client := createClient(2*time.Second, cacheMock, providerMock, updaterMock)
 	ip := net.ParseIP("127.0.0.1")
+	req := &updater.UpdateRequest{IPv4: ip}
 
 	// doUpdate should be called twice, so at least the cacheMock should be checked twice as well
-	cacheMock.On("GetLastIp").
+	cacheMock.On("GetLastRequest").
 		Twice().
 		Return(nil, nil)
 
-	providerMock.On("GetIP", mock.Anything).
+	providerMock.On("GetIPv4", mock.Anything).
 		Return(ip, nil)
 
-	updaterMock.On("UpdateIP", mock.Anything, ip).
+	updaterMock.On("UpdateIP", mock.Anything, req).
 		Return(nil)
 
-	cacheMock.On("SetLastIp", ip).
+	cacheMock.On("SetLastRequest", req).
 		Return(nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

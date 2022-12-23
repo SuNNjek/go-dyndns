@@ -9,7 +9,6 @@ import (
 	"go-dyndns/log"
 	"go-dyndns/util"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -72,15 +71,15 @@ func newDynDnsUpdater(
 	}
 }
 
-func (u *dynDnsUpdater) UpdateIP(ctx context.Context, addr net.IP) error {
-	u.logger.Info("Updating IP for domains %v to %v", strings.Join(u.config.Domains, ", "), addr)
+func (u *dynDnsUpdater) UpdateIP(ctx context.Context, req *UpdateRequest) error {
+	u.logger.Info("Updating IP for domains %v to %v", strings.Join(u.config.Domains, ", "), req)
 
-	req, err := u.createUpdateRequest(ctx, addr)
+	webReq, err := u.createUpdateWebRequest(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	resp, err := u.httpClient.Do(req)
+	resp, err := u.httpClient.Do(webReq)
 	if err != nil {
 		return err
 	}
@@ -95,7 +94,7 @@ func (u *dynDnsUpdater) UpdateIP(ctx context.Context, addr net.IP) error {
 	return u.handleResponse(strings.TrimSpace(string(body)))
 }
 
-func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*http.Request, error) {
+func (u *dynDnsUpdater) createUpdateWebRequest(ctx context.Context, req *UpdateRequest) (*http.Request, error) {
 	strUrl := fmt.Sprintf("https://%s/v3/update", u.config.Host)
 	updateUrl, err := url.Parse(strUrl)
 	if err != nil {
@@ -104,7 +103,12 @@ func (u *dynDnsUpdater) createUpdateRequest(ctx context.Context, addr net.IP) (*
 
 	query := make(url.Values)
 	query.Add("hostname", strings.Join(u.config.Domains, ","))
-	query.Add("myip", fmt.Sprint(addr))
+	query.Add("myip", req.IPv4.String())
+
+	if req.IPv6Prefix != nil {
+		query.Add("ip6lanprefix", req.IPv6Prefix.String())
+	}
+
 	updateUrl.RawQuery = query.Encode()
 
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, updateUrl.String(), nil)

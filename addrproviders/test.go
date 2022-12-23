@@ -15,7 +15,7 @@ type MockProvider struct {
 	mock.Mock
 }
 
-func (m *MockProvider) GetIP(ctx context.Context) (net.IP, error) {
+func (m *MockProvider) GetIPv4(ctx context.Context) (net.IP, error) {
 	args := m.Called(ctx)
 
 	if ip, ok := args.Get(0).(net.IP); ok {

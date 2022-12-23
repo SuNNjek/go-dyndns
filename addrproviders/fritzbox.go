@@ -38,7 +38,7 @@ func loadFritzBoxConfig() (*fritzBoxConfig, error) {
 	return &config, nil
 }
 
-func (f *fritzBoxProvider) GetIP(ctx context.Context) (net.IP, error) {
+func (f *fritzBoxProvider) GetIPv4(ctx context.Context) (net.IP, error) {
 	resp, err := f.makeExternalIpSoapRequest(ctx, f.config.Host)
 	if err != nil {
 		return nil, err
@@ -55,6 +55,26 @@ func (f *fritzBoxProvider) GetIP(ctx context.Context) (net.IP, error) {
 		return nil, ParseIpError
 	} else {
 		return ip, nil
+	}
+}
+
+func (f *fritzBoxProvider) GetIPv6Prefix(ctx context.Context) (*util.IPv6Prefix, error) {
+	resp, err := f.makeIpv6PrefixSoapRequest(ctx, f.config.Host)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	result, err := parseIpv6PrefixSoapResponse(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if prefix, err := util.ParseIPv6Prefix(result); err != nil {
+		return nil, err
+	} else {
+		return prefix, nil
 	}
 }
 
@@ -79,6 +99,27 @@ func (f *fritzBoxProvider) makeExternalIpSoapRequest(ctx context.Context, host s
 
 	return f.httpClient.Do(request)
 }
+func (f *fritzBoxProvider) makeIpv6PrefixSoapRequest(ctx context.Context, host string) (*http.Response, error) {
+	url := fmt.Sprintf("http://%s:49000/igdupnp/control/WANIPConn1", host)
+	body := `<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<s:Body>
+		<u:X_AVM_DE_GetIPv6Prefix xmlns:u="urn:schemas-upnp-org:service:WANIPConnection:1" />
+	</s:Body>
+</s:Envelope>`
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, url, strings.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+
+	defer request.Body.Close()
+
+	request.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
+	request.Header.Add("SOAPAction", "urn:schemas-upnp-org:service:WANIPConnection:1#X_AVM_DE_GetIPv6Prefix")
+
+	return f.httpClient.Do(request)
+}
 
 func parseExternalIpSoapResponse(body io.Reader) (string, error) {
 	root, err := xmlquery.Parse(body)
@@ -92,4 +133,24 @@ func parseExternalIpSoapResponse(body io.Reader) (string, error) {
 	}
 
 	return node.Data, nil
+}
+
+func parseIpv6PrefixSoapResponse(body io.Reader) (string, error) {
+	root, err := xmlquery.Parse(body)
+	if err != nil {
+		return "", err
+	}
+
+	prefixNode := xmlquery.FindOne(root, "//NewIPv6Prefix/text()")
+	if prefixNode == nil {
+		return "", InvalidResponseError
+	}
+
+	prefixLengthNode := xmlquery.FindOne(root, "//NewPrefixLength/text()")
+	if prefixLengthNode == nil {
+		return "", InvalidResponseError
+	}
+
+	addrStr := fmt.Sprintf("%s/%s", prefixNode.Data, prefixLengthNode.Data)
+	return addrStr, nil
 }

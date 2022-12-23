@@ -41,6 +41,7 @@ The following environment variables can be used:
 * `CLIENT_IPPROVIDER`: Can be either `web` or `fritzbox`, default is `web`.
   Controls how the public IP is determined.
 * `CLIENT_DELAY`: Delay between updates. Defaults to 10 minutes (`10m`)
+* `CLIENT_ENABLEIPV6`: Whether IPv6 is enabled or not (only available with FritzBox provider). Can be either `true` or `false`.
 * `FRITZBOX_HOST`: The hostname of the FritzBox. Defaults to `fritz.box`. Only used with `fritzbox` provider
 * `IPCHECK_URL`: The URL to use to determine the public IP address. Only used with `web` provider
 * `CACHE_FILE`: Specifies the location for the cache file. If not specified, the cache

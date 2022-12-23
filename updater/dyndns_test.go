@@ -54,7 +54,7 @@ func Test_dynDnsUpdater_UpdateIP_shouldCallApiCorrectly(t *testing.T) {
 		Domains: []string{"example1.com", "example2.com"},
 	}, passwordProvider, logger, httpClient)
 
-	err := updater.UpdateIP(context.Background(), net.ParseIP("127.0.0.1"))
+	err := updater.UpdateIP(context.Background(), &UpdateRequest{IPv4: net.ParseIP("127.0.0.1")})
 	assert.Nil(t, err)
 
 	httpClient.AssertExpectations(t)

@@ -63,28 +63,44 @@ func (c *DynDnsClient) Run(ctx context.Context) error {
 }
 
 func (c *DynDnsClient) doUpdate(ctx context.Context) error {
-	lastIp, err := c.cache.GetLastIp()
+	lastReq, err := c.cache.GetLastRequest()
 	if err != nil {
 		c.logger.Warn("Failed to get last IP from cache: %v", err)
 	}
 
-	ip, err := c.provider.GetIP(ctx)
+	ip, err := c.provider.GetIPv4(ctx)
 	if err != nil {
 		return err
 	}
 
+	req := &updater.UpdateRequest{
+		IPv4: ip,
+	}
+
+	// When enabled and supported by the provider, request the IPv6 prefix as well
+	if c.config.EnableIPv6 {
+		if ipv6Provider, ok := c.provider.(addrproviders.AddressV6Provider); ok {
+			prefix, err := ipv6Provider.GetIPv6Prefix(ctx)
+			if err != nil {
+				return err
+			}
+
+			req.IPv6Prefix = prefix
+		}
+	}
+
 	// Don't send an update request if the IP matches that from cache.
 	// DynDNS providers don't like it when you send too many requests for the same IP ;)
-	if ip.Equal(lastIp) {
+	if req.Equal(lastReq) {
 		c.logger.Debug("IP is already up to date")
 		return nil
 	}
 
-	if err = c.updater.UpdateIP(ctx, ip); err != nil {
+	if err = c.updater.UpdateIP(ctx, req); err != nil {
 		return err
 	} else {
 		c.logger.Info("IP successfully updated")
 	}
 
-	return c.cache.SetLastIp(ip)
+	return c.cache.SetLastRequest(req)
 }

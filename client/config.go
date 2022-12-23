@@ -8,6 +8,7 @@ import (
 
 type clientConfig struct {
 	IpProvider addrproviders.ProviderType `default:"web"`
+	EnableIPv6 bool                       `default:"false"`
 	Delay      time.Duration              `default:"10m"`
 }
 

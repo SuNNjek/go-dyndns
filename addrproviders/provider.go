@@ -14,7 +14,13 @@ const (
 )
 
 type AddressProvider interface {
-	GetIP(ctx context.Context) (net.IP, error)
+	GetIPv4(ctx context.Context) (net.IP, error)
+}
+
+type AddressV6Provider interface {
+	AddressProvider
+
+	GetIPv6Prefix(ctx context.Context) (*util.IPv6Prefix, error)
 }
 
 func CreateProvider(provider ProviderType, httpClient util.HttpClient) (AddressProvider, error) {

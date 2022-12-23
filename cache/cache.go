@@ -2,12 +2,12 @@ package cache
 
 import (
 	"github.com/kelseyhightower/envconfig"
-	"net"
+	"go-dyndns/updater"
 )
 
 type Cache interface {
-	GetLastIp() (net.IP, error)
-	SetLastIp(ip net.IP) error
+	GetLastRequest() (*updater.UpdateRequest, error)
+	SetLastRequest(req *updater.UpdateRequest) error
 }
 
 type cacheConfig struct {
