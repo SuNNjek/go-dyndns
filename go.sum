@@ -1,9 +1,10 @@
-github.com/antchfx/htmlquery v1.2.6 h1:Ee7+vpVb7qbgQ4QffP6TVZrw+XMjCbth0pVKv7jqpB8=
-github.com/antchfx/htmlquery v1.2.6/go.mod h1:kYx/LosPyRriF4TVOAYmKrBgi1mfAhrwJExTcwKg530=
+github.com/antchfx/htmlquery v1.3.0 h1:5I5yNFOVI+egyia5F2s/5Do2nFWxJz41Tr3DyfKD25E=
+github.com/antchfx/htmlquery v1.3.0/go.mod h1:zKPDVTMhfOmcwxheXUsx4rKJy8KEY/PU6eXr/2SebQ8=
 github.com/antchfx/xmlquery v1.3.14 h1:JVLQF1UIstQytN6MVES7D8gCiqIazZA+A2NWryaHwYk=
 github.com/antchfx/xmlquery v1.3.14/go.mod h1:yPRBXRdd2Xqz9c2Z61qvMKbK+u3NXXydp6nqEfw4VdI=
-github.com/antchfx/xpath v1.2.2 h1:fsKX4sHfxhsGpDMYjsvCmGC0EGdiT7XA0af/6PP6Oa0=
 github.com/antchfx/xpath v1.2.2/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
+github.com/antchfx/xpath v1.2.3 h1:CCZWOzv5bAqjVv0offZ2LVgVYFbeldKQVuLNbViZdes=
+github.com/antchfx/xpath v1.2.3/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
