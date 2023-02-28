@@ -7,7 +7,7 @@ require (
 	github.com/antchfx/xmlquery v1.3.15
 	github.com/google/wire v0.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	golang.org/x/net v0.7.0
 )
 
