@@ -8,7 +8,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.2
-	golang.org/x/net v0.9.0
+	golang.org/x/net v0.10.0
 )
 
 require (
